@@ -67,7 +67,7 @@ function handleAction(id, action) {
     fetch(url)
         .then(response => response.text())
         .then(text => {
-            if (text === "ok") {
+            if (text.trim() === "ok") {
                 alert(`Action ${action} for G${id} was successful!`);
             } else {
                 throw new Error(`Unexpected response: ${text}`);
