@@ -65,15 +65,13 @@ document.addEventListener("DOMContentLoaded", function() {
 function handleAction(id, action) {
     const url = `https://trigger.macrodroid.com/616f2c21-3620-4c79-af0f-c275d7ca3fd7/${action}_${id}`;
     fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+        .then(response => response.text())
+        .then(text => {
+            if (text === "ok") {
+                alert(`Action ${action} for G${id} was successful!`);
+            } else {
+                throw new Error(`Unexpected response: ${text}`);
             }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data);
-            alert(`Action ${action} for G${id} was successful!`);
         })
         .catch(error => {
             console.error('There was an error with the action:', error);
