@@ -22,6 +22,7 @@ button {
     background-color: #007bff;
     color: white;
     cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 .box {
