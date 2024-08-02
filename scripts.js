@@ -9,15 +9,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
     newButton.addEventListener("click", () => {
         const boxId = prompt("Enter box number (or range separated by a dash):");
-        if (boxId.includes("-")) {
-            const [start, end] = boxId.split("-").map(Number);
-            for (let i = start; i <= end; i++) {
-                addBox(i);
-                saveBox(i);
+        if (boxId) {
+            if (boxId.includes("-")) {
+                const [start, end] = boxId.split("-").map(Number);
+                for (let i = start; i <= end; i++) {
+                    addBox(i);
+                    saveBox(i);
+                }
+            } else {
+                addBox(boxId);
+                saveBox(boxId);
             }
-        } else {
-            addBox(boxId);
-            saveBox(boxId);
         }
     });
 
@@ -54,8 +56,11 @@ document.addEventListener("DOMContentLoaded", function() {
         localStorage.setItem('boxes', JSON.stringify(boxes));
     }
 
-    function removeBox(id) {
-        document.getElementById(`box-${id}`).remove();
+    window.removeBox = function(id) {
+        const boxElement = document.getElementById(`box-${id}`);
+        if (boxElement) {
+            boxElement.remove();
+        }
         let boxes = JSON.parse(localStorage.getItem('boxes')) || [];
         boxes = boxes.filter(boxId => boxId != id);
         localStorage.setItem('boxes', JSON.stringify(boxes));
@@ -67,14 +72,11 @@ function handleAction(id, action) {
     fetch(url)
         .then(response => response.text())
         .then(text => {
-            if (text.trim() === "ok") {
-                alert(`Action ${action} for G${id} was successful!`);
-            } else {
+            if (text.trim() !== "ok") {
                 throw new Error(`Unexpected response: ${text}`);
             }
         })
         .catch(error => {
             console.error('There was an error with the action:', error);
-            alert(`Action ${action} for G${id} failed! Error: ${error.message}`);
         });
 }
