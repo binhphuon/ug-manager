@@ -3,15 +3,21 @@ document.addEventListener("DOMContentLoaded", function() {
     const boxContainer = document.getElementById("boxContainer");
     const searchInput = document.getElementById("search");
 
+    // Load boxes from local storage
+    const boxes = JSON.parse(localStorage.getItem('boxes')) || [];
+    boxes.forEach(id => addBox(id));
+
     newButton.addEventListener("click", () => {
         const boxId = prompt("Enter box number (or range separated by a dash):");
         if (boxId.includes("-")) {
             const [start, end] = boxId.split("-").map(Number);
             for (let i = start; i <= end; i++) {
-                addBox(`G${i}`);
+                addBox(i);
+                saveBox(i);
             }
         } else {
-            addBox(`G${boxId}`);
+            addBox(boxId);
+            saveBox(boxId);
         }
     });
 
@@ -30,27 +36,47 @@ document.addEventListener("DOMContentLoaded", function() {
     function addBox(id) {
         const box = document.createElement("div");
         box.className = "box";
+        box.id = `box-${id}`;
         box.innerHTML = `
-            <span>${id}</span>
+            <span>G${id}</span>
             <button onclick="handleAction('${id}', 'reboot')">Reboot</button>
             <button onclick="handleAction('${id}', 'replace')">Replace</button>
             <button onclick="handleAction('${id}', 'sendgem')">Send Gem</button>
             <button onclick="handleAction('${id}', 'autoexec')">Autoexec</button>
+            <button onclick="removeBox('${id}')">Delete</button>
         `;
         boxContainer.appendChild(box);
+    }
+
+    function saveBox(id) {
+        const boxes = JSON.parse(localStorage.getItem('boxes')) || [];
+        boxes.push(id);
+        localStorage.setItem('boxes', JSON.stringify(boxes));
+    }
+
+    function removeBox(id) {
+        document.getElementById(`box-${id}`).remove();
+        let boxes = JSON.parse(localStorage.getItem('boxes')) || [];
+        boxes = boxes.filter(boxId => boxId != id);
+        localStorage.setItem('boxes', JSON.stringify(boxes));
     }
 });
 
 function handleAction(id, action) {
     const url = `https://trigger.macrodroid.com/616f2c21-3620-4c79-af0f-c275d7ca3fd7/${action}_${id}`;
     fetch(url)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             console.log(data);
-            alert(`Action ${action} for ${id} was successful!`);
+            alert(`Action ${action} for G${id} was successful!`);
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert(`Action ${action} for ${id} failed!`);
+            console.error('There was an error with the action:', error);
+            alert(`Action ${action} for G${id} failed! Error: ${error.message}`);
         });
 }
